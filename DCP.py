@@ -8,45 +8,36 @@ from selenium.common.exceptions import TimeoutException
 import time
 
 
-
-URL = "https://www.waterstones.com/campaign/special-editions"
-driver = webdriver.Chrome() 
-driver.get(URL)
-#time.sleep(2) 
-#accept_cookies_button = driver.find_element(by=By.XPATH, value='//*[@id="onetrust-accept-btn-handler"]')
-#accept_cookies_button.click()
-#driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
-
-
-
-
 class Scraper:
+
+    def __init__(self, URL):
+        self.driver = webdriver.Chrome() 
+        self.driver.get(URL)
+        
     
-    def accept_cookies(self, driver):
+    def accept_cookies(self):
         delay = 10
-        accept_cookies_button = WebDriverWait(driver, delay).until(EC.presence_of_element_located((By.XPATH, '//*[@id="onetrust-accept-btn-handler"]')))
-        #accept_cookies_button = driver.find_element(by=By.XPATH, value='//*[@id="onetrust-accept-btn-handler"]')
+        accept_cookies_button = WebDriverWait(self.driver, delay).until(EC.presence_of_element_located((By.XPATH, '//*[@id="onetrust-accept-btn-handler"]')))
         accept_cookies_button.click()
          
 
-    def scroll(self, driver):
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+    def scroll(self):
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(2)
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(2)
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(2)
         #show_more_button = driver.find_element(by=By.CLASS_NAME, value='button button-teal')
-        show_more_button = driver.find_element(by=By.XPATH, value='/html/body/div[1]/div[3]/div[3]/div[3]/button')
+        show_more_button = self.driver.find_element(by=By.XPATH, value='/html/body/div[1]/div[3]/div[3]/div[3]/button')
         show_more_button.click()
         delay = 10
         x = TRUE
         while x == TRUE:
             try:
                 time.sleep(2)
-                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-                WebDriverWait(driver, delay).until(EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div[3]/div[3]/div[3]/button')))
+                self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                WebDriverWait(self.driver, delay).until(EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div[3]/div[3]/div[3]/button')))
                 time.sleep(1)
                 show_more_button.click()
             except:
@@ -75,11 +66,11 @@ class Scraper:
 
 
 if __name__ == "__main__":
-    book_info = Scraper()
-    book_info.accept_cookies(driver)
+    book_info = Scraper(URL = "https://www.waterstones.com/campaign/special-editions")
+    book_info.accept_cookies()
     #book_info.scroll(driver)
-    link_list = book_info.get_links(driver)
-    print(len(link_list))
-    print(link_list[1])
+    #link_list = book_info.get_links(driver)
+    #print(len(link_list))
+    #print(link_list[1])
 
-    book_info.get_text_data(driver, link_list)
+    #book_info.get_text_data(driver, link_list)
