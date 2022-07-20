@@ -55,13 +55,16 @@ class Scraper:
 
     def get_text_data(self):
         self.price_list = []
+        self.name_list = []
 
         for URL in self.link_list:
             self.driver.get(URL)
             time.sleep(0.5)
             price = self.driver.find_element(by=By.XPATH, value='//b[@itemprop="price"]').text
             self.price_list.append(price)
-            #print(price)
+            name = self.driver.find_element(by=By.XPATH, value='//span[@class="book-title"]').text
+            self.name_list.append(name)
+            
 
 
 
@@ -69,8 +72,8 @@ class Scraper:
 if __name__ == "__main__":
     book_info = Scraper(URL = "https://www.waterstones.com/campaign/special-editions")
     book_info.accept_cookies()
-    book_info.scroll(rep=3)
-    book_info.infinite_scroll()
+    #book_info.scroll(rep=3)
+    #book_info.infinite_scroll()
     book_info.get_links()
     book_info.get_text_data()
     print(book_info.price_list)
