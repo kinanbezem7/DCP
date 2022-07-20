@@ -28,7 +28,9 @@ class Scraper:
         time.sleep(2)
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(2)
-        #show_more_button = driver.find_element(by=By.CLASS_NAME, value='button button-teal')
+
+
+    def infinite_scroll(self):    
         show_more_button = self.driver.find_element(by=By.XPATH, value='/html/body/div[1]/div[3]/div[3]/div[3]/button')
         show_more_button.click()
         delay = 10
@@ -43,8 +45,8 @@ class Scraper:
             except:
                 x = FALSE
 
-    def get_links(self, driver):
-        book_container = driver.find_element(by=By.XPATH, value='//div[@class="search-results-list"]') # XPath corresponding to the Container
+    def get_links(self):
+        book_container =self. driver.find_element(by=By.XPATH, value='//div[@class="search-results-list"]') # XPath corresponding to the Container
         book_list = book_container.find_elements(by=By.XPATH, value='./div')
         link_list = []
 
@@ -54,12 +56,12 @@ class Scraper:
             link_list.append(link)
         return link_list
 
-    def get_text_data(self,driver, link_list):
+    def get_text_data(self, link_list):
     #     for URL in link_list:
         URL = link_list[1]
-        driver.get(URL)
+        self.driver.get(URL)
         time.sleep(2)
-        price = driver.find_element(by=By.XPATH, value='/html/body/div[1]/div[2]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[1]/div/b[2]').text
+        price = self.driver.find_element(by=By.XPATH, value='/html/body/div[1]/div[2]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[1]/div/b[2]').text
         print(price)
 
 
@@ -68,9 +70,9 @@ class Scraper:
 if __name__ == "__main__":
     book_info = Scraper(URL = "https://www.waterstones.com/campaign/special-editions")
     book_info.accept_cookies()
-    #book_info.scroll(driver)
-    #link_list = book_info.get_links(driver)
+    book_info.scroll()
+    book_info.infinite_scroll()
+    link_list = book_info.get_links()
     #print(len(link_list))
     #print(link_list[1])
-
-    #book_info.get_text_data(driver, link_list)
+    #book_info.get_text_data(link_list)
