@@ -48,21 +48,23 @@ class Scraper:
     def get_links(self):
         book_container =self. driver.find_element(by=By.XPATH, value='//div[@class="search-results-list"]') # XPath corresponding to the Container
         book_list = book_container.find_elements(by=By.XPATH, value='./div')
-        link_list = []
+        self.link_list = []
 
         for book_property in book_list:
             a_tag = book_property.find_element(by=By.TAG_NAME, value='a')
             link = a_tag.get_attribute('href')
-            link_list.append(link)
-        return link_list
+            self.link_list.append(link)
+        
 
-    def get_text_data(self, link_list):
-    #     for URL in link_list:
-        URL = link_list[1]
-        self.driver.get(URL)
-        time.sleep(2)
-        price = self.driver.find_element(by=By.XPATH, value='/html/body/div[1]/div[2]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[1]/div/b[2]').text
-        print(price)
+    def get_text_data(self):
+        self.price_list = []
+
+        for URL in self.link_list:
+            self.driver.get(URL)
+            time.sleep(0.5)
+            price = self.driver.find_element(by=By.XPATH, value='//b[@itemprop="price"]').text
+            self.price_list.append(price)
+            #print(price)
 
 
 
@@ -70,9 +72,8 @@ class Scraper:
 if __name__ == "__main__":
     book_info = Scraper(URL = "https://www.waterstones.com/campaign/special-editions")
     book_info.accept_cookies()
-    book_info.scroll()
-    book_info.infinite_scroll()
-    link_list = book_info.get_links()
-    #print(len(link_list))
-    #print(link_list[1])
-    #book_info.get_text_data(link_list)
+    #book_info.scroll()
+    #book_info.infinite_scroll()
+    book_info.get_links()
+    book_info.get_text_data()
+    print(book_info.price_list)
