@@ -65,7 +65,16 @@ class Scraper:
             name = self.driver.find_element(by=By.XPATH, value='//span[@class="book-title"]').text
             self.name_list.append(name)
             
+    def get_img_data(self):
+        self.img_list = []
 
+        for URL in self.link_list:
+            self.driver.get(URL)
+            time.sleep(0.5)
+            img_container =self.driver.find_element(by=By.XPATH, value='//div[@class="main-container"]') # XPath corresponding to the Container
+            img_tag = img_container.find_element(by=By.XPATH, value='.//img[@itemprop="image"]')
+            src = img_tag.get_attribute('src')
+            self.img_list.append(src)
 
 
 
@@ -75,5 +84,7 @@ if __name__ == "__main__":
     #book_info.scroll(rep=3)
     #book_info.infinite_scroll()
     book_info.get_links()
-    book_info.get_text_data()
+    # book_info.get_text_data()
+    book_info.get_img_data()
+
     print(book_info.price_list)
