@@ -22,15 +22,15 @@ driver.get(URL)
 
 
 class Scraper:
-
-    def accept_cookies(self,driver):
+    
+    def accept_cookies(self, driver):
         delay = 10
-        WebDriverWait(driver, delay).until(EC.presence_of_element_located((By.XPATH, '//*[@id="onetrust-accept-btn-handler"]')))
-        accept_cookies_button = driver.find_element(by=By.XPATH, value='//*[@id="onetrust-accept-btn-handler"]')
+        accept_cookies_button = WebDriverWait(driver, delay).until(EC.presence_of_element_located((By.XPATH, '//*[@id="onetrust-accept-btn-handler"]')))
+        #accept_cookies_button = driver.find_element(by=By.XPATH, value='//*[@id="onetrust-accept-btn-handler"]')
         accept_cookies_button.click()
          
 
-    def scroll(self,driver):
+    def scroll(self, driver):
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(2)
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -52,7 +52,7 @@ class Scraper:
             except:
                 x = FALSE
 
-    def get_links(self,driver):
+    def get_links(self, driver):
         book_container = driver.find_element(by=By.XPATH, value='//div[@class="search-results-list"]') # XPath corresponding to the Container
         book_list = book_container.find_elements(by=By.XPATH, value='./div')
         link_list = []
@@ -63,7 +63,7 @@ class Scraper:
             link_list.append(link)
         return link_list
 
-    def get_text_data(self,driver,link_list):
+    def get_text_data(self,driver, link_list):
     #     for URL in link_list:
         URL = link_list[1]
         driver.get(URL)
@@ -82,4 +82,4 @@ if __name__ == "__main__":
     print(len(link_list))
     print(link_list[1])
 
-    book_info.get_text_data(driver,link_list)
+    book_info.get_text_data(driver, link_list)
