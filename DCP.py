@@ -21,13 +21,14 @@ class Scraper:
         accept_cookies_button.click()
          
 
-    def scroll(self):
-        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(2)
-        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(2)
-        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(2)
+    def scroll(self,rep):
+        for i in range(rep):
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(2)
+        # self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        # time.sleep(2)
+        # self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        # time.sleep(2)
 
 
     def infinite_scroll(self):    
@@ -72,8 +73,8 @@ class Scraper:
 if __name__ == "__main__":
     book_info = Scraper(URL = "https://www.waterstones.com/campaign/special-editions")
     book_info.accept_cookies()
-    #book_info.scroll()
-    #book_info.infinite_scroll()
+    book_info.scroll(rep=3)
+    book_info.infinite_scroll()
     book_info.get_links()
     book_info.get_text_data()
     print(book_info.price_list)
