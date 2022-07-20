@@ -64,9 +64,9 @@ class Scraper:
         return link_list
 
 
-
-book_info = Scraper()
-book_info.accept_cookies(driver)
-book_info.scroll(driver)
-link_list = book_info.get_links(driver)
-print(len(link_list))
+if __name__ == "__main__":
+    book_info = Scraper()
+    book_info.accept_cookies(driver)
+    book_info.scroll(driver)
+    link_list = book_info.get_links(driver)
+    print(len(link_list))
