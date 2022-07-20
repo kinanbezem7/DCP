@@ -57,16 +57,29 @@ class Scraper:
         book_list = book_container.find_elements(by=By.XPATH, value='./div')
         link_list = []
 
-        for house_property in book_list:
-            a_tag = house_property.find_element(by=By.TAG_NAME, value='a')
+        for book_property in book_list:
+            a_tag = book_property.find_element(by=By.TAG_NAME, value='a')
             link = a_tag.get_attribute('href')
             link_list.append(link)
         return link_list
+
+    def get_text_data(self,driver,link_list):
+    #     for URL in link_list:
+        URL = link_list[1]
+        driver.get(URL)
+        time.sleep(2)
+        price = driver.find_element(by=By.XPATH, value='/html/body/div[1]/div[2]/div[2]/section[1]/div[2]/div[2]/div/div/div/div[1]/div/b[2]').text
+        print(price)
+
+
 
 
 if __name__ == "__main__":
     book_info = Scraper()
     book_info.accept_cookies(driver)
-    book_info.scroll(driver)
+    #book_info.scroll(driver)
     link_list = book_info.get_links(driver)
     print(len(link_list))
+    print(link_list[1])
+
+    book_info.get_text_data(driver,link_list)
