@@ -8,6 +8,8 @@ from selenium.common.exceptions import TimeoutException
 import time
 import uuid
 import os
+import json
+from json import JSONEncoder
 
 try:
     os.mkdir('raw_data ')
@@ -69,12 +71,12 @@ class Scraper:
             self.driver.get(URL)
             time.sleep(0.5)
             price = self.driver.find_element(by=By.XPATH, value='//b[@itemprop="price"]').text
-            self.price_list.append(price)
+            self.price_list.append(str(price))
             name = self.driver.find_element(by=By.XPATH, value='//span[@class="book-title"]').text
             self.name_list.append(name)
             isbn = self.driver.find_element(by=By.XPATH, value='/html/body/div[1]/div[2]/div[2]/section[2]/div[2]/div/div/p/i[2]/span').text
             self.isbn_list.append(isbn)
-            book_id = uuid.uuid4()
+            book_id = str(uuid.uuid4())
             self.id_list.append(book_id)
 
             
@@ -109,4 +111,6 @@ if __name__ == "__main__":
         except FileExistsError:
             print("Directory already exists")
 
-    print(book_dict_list)
+        with open(os.path.join('raw_data', str(book_dict_list[index]['ISBN']),'data.json'), 'w') as fp:
+            json.dump(book_dict_list[index], fp)
+
