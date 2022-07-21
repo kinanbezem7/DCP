@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 import time
+import uuid
 
 
 class Scraper:
@@ -56,6 +57,8 @@ class Scraper:
     def get_text_data(self):
         self.price_list = []
         self.name_list = []
+        self.isbn_list = []
+        self.id_list = []
 
         for URL in self.link_list:
             self.driver.get(URL)
@@ -64,6 +67,12 @@ class Scraper:
             self.price_list.append(price)
             name = self.driver.find_element(by=By.XPATH, value='//span[@class="book-title"]').text
             self.name_list.append(name)
+            isbn = self.driver.find_element(by=By.XPATH, value='/html/body/div[1]/div[2]/div[2]/section[2]/div[2]/div/div/p/i[2]/span').text
+            self.isbn_list.append(isbn)
+            book_id = uuid.uuid4()
+            self.id_list.append(book_id)
+            print(book_id)
+
             
     def get_img_data(self):
         self.img_list = []
@@ -84,7 +93,8 @@ if __name__ == "__main__":
     #book_info.scroll(rep=3)
     #book_info.infinite_scroll()
     book_info.get_links()
-    # book_info.get_text_data()
+    book_info.get_text_data()
     book_info.get_img_data()
 
-    print(book_info.price_list)
+    print(len(book_info.price_list))
+    print(len(book_info.img_list))
