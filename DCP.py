@@ -103,5 +103,10 @@ if __name__ == "__main__":
 
     for index in range(len(book_info.link_list)):
         book_dict_list.append({'ID': book_info.id_list[index], 'ISBN': book_info.isbn_list[index], 'Price': book_info.price_list[index], 'Name': book_info.name_list[index], 'Price': book_info.price_list[index]})
+        try:
+            os.mkdir(os.path.join('raw_data', str(book_dict_list[index]['ISBN'])))
+
+        except FileExistsError:
+            print("Directory already exists")
 
     print(book_dict_list)
