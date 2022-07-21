@@ -7,7 +7,12 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 import time
 import uuid
+import os
 
+try:
+    os.mkdir('raw_data ')
+except FileExistsError:
+    print("Directory already exists")
 
 class Scraper:
 
