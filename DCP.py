@@ -71,7 +71,6 @@ class Scraper:
             self.isbn_list.append(isbn)
             book_id = uuid.uuid4()
             self.id_list.append(book_id)
-            print(book_id)
 
             
     def get_img_data(self):
@@ -95,6 +94,9 @@ if __name__ == "__main__":
     book_info.get_links()
     book_info.get_text_data()
     book_info.get_img_data()
+    book_dict_list = []
 
-    print(len(book_info.price_list))
-    print(len(book_info.img_list))
+    for index in range(len(book_info.link_list)):
+        book_dict_list.append({'ID': book_info.id_list[index], 'ISBN': book_info.isbn_list[index], 'Price': book_info.price_list[index], 'Name': book_info.name_list[index], 'Price': book_info.price_list[index]})
+
+    print(book_dict_list)
