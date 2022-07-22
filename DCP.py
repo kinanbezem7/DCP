@@ -1,4 +1,3 @@
-
 from pickle import FALSE, TRUE
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -10,6 +9,10 @@ import uuid
 import os
 import json
 import urllib.request
+import requests
+
+
+
 
 
 try:
@@ -116,8 +119,10 @@ if __name__ == "__main__":
             json.dump(book_dict_list[index], fp)
 
         path = ['raw_data/', str(book_dict_list[index]['ISBN']), '/',  str(book_dict_list[index]['ISBN']), '.jpg' ]
-        print(str(book_info.img_list[index]))
-        urllib.request.urlretrieve(str(book_info.img_list[index]), ''.join(path))
+        image = requests.get(str(book_info.img_list[index])).content
+        with open(''.join(path), "wb") as outimage:
+            outimage.write(image)
+
 
 
 
