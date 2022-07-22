@@ -9,7 +9,8 @@ import time
 import uuid
 import os
 import json
-from json import JSONEncoder
+import urllib.request
+
 
 try:
     os.mkdir('raw_data ')
@@ -113,4 +114,10 @@ if __name__ == "__main__":
 
         with open(os.path.join('raw_data', str(book_dict_list[index]['ISBN']),'data.json'), 'w') as fp:
             json.dump(book_dict_list[index], fp)
+
+        path = ['raw_data/', str(book_dict_list[index]['ISBN']), '/',  str(book_dict_list[index]['ISBN']), '.jpg' ]
+        print(str(book_info.img_list[index]))
+        urllib.request.urlretrieve(str(book_info.img_list[index]), ''.join(path))
+
+
 
