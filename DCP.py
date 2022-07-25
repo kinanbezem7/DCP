@@ -8,7 +8,6 @@ import time
 import uuid
 import os
 import json
-import urllib.request
 import requests
 
 
