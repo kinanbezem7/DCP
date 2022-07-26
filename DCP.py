@@ -20,25 +20,44 @@ except FileExistsError:
     print("Directory already exists")
 
 class Scraper:
+    """  
+    Scraper class to get text and image data from waterstones website
+
+    Attributes:
+        URL (str): URL to the book list you want to extract data from i.e. "special editions"
+    """
 
     def __init__(self, URL):
+        '''
+        See help(Scraper) for accurate signature
+        '''
         self.driver = webdriver.Chrome() 
         self.driver.get(URL)
         
     
     def accept_cookies(self):
+        """ 
+        Method for pressing the accept cookies button at the bottom of the page
+        """
         delay = 10
         accept_cookies_button = WebDriverWait(self.driver, delay).until(EC.presence_of_element_located((By.XPATH, '//*[@id="onetrust-accept-btn-handler"]')))
         accept_cookies_button.click()
          
 
     def scroll(self,rep):
+        """ 
+        Method for scrolling to the bottom of the page to load more books
+        """
         for i in range(rep):
             self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             time.sleep(2)
 
 
     def infinite_scroll(self):    
+        """ 
+        Method for infitely scrolling to the bottom of the list by pressing the "load more" button and scrolling. 
+        This is used in order to load all of the books in the list
+        """
         show_more_button = self.driver.find_element(by=By.XPATH, value='/html/body/div[1]/div[3]/div[3]/div[3]/button')
         show_more_button.click()
         delay = 10
@@ -54,6 +73,12 @@ class Scraper:
                 x = FALSE
 
     def get_links(self):
+        """ 
+        Method for getting the links of all the books in the loaded list 
+
+        Returns:
+            link_list (list): list of the URL's for all the listed books
+        """
         book_container =self. driver.find_element(by=By.XPATH, value='//div[@class="search-results-list"]') # XPath corresponding to the Container
         book_list = book_container.find_elements(by=By.XPATH, value='./div')
         self.link_list = []
@@ -63,16 +88,27 @@ class Scraper:
             link = a_tag.get_attribute('href')
             self.link_list.append(link)
         
+    def get_data(self):
+        """ 
+        Method for extracting image and text data for each books. This method will load each book individually, extract the text data and download their respective images. 
 
-    def get_text_data(self):
+        Retruns:
+            price_list (list): list of book prices
+            name_list (list): List of book names 
+            isbn_list (list): List of the ISBN numbers 
+            id_list (list): List UUID4 reference for each of the books
+            img_list (list): List SRC links for the main image of each book  
+        """
         self.price_list = []
         self.name_list = []
         self.isbn_list = []
-        self.id_list = []
+        self.id_list = []        
+        self.img_list = []
 
         for URL in self.link_list:
             self.driver.get(URL)
             time.sleep(0.5)
+            #Get text data
             price = self.driver.find_element(by=By.XPATH, value='//b[@itemprop="price"]').text
             self.price_list.append(str(price))
             name = self.driver.find_element(by=By.XPATH, value='//span[@class="book-title"]').text
@@ -81,19 +117,11 @@ class Scraper:
             self.isbn_list.append(isbn)
             book_id = str(uuid.uuid4())
             self.id_list.append(book_id)
-
-            
-    def get_img_data(self):
-        self.img_list = []
-
-        for URL in self.link_list:
-            self.driver.get(URL)
-            time.sleep(0.5)
+            #Get image data
             img_container =self.driver.find_element(by=By.XPATH, value='//div[@class="main-container"]') # XPath corresponding to the Container
             img_tag = img_container.find_element(by=By.XPATH, value='.//img[@itemprop="image"]')
             src = img_tag.get_attribute('src')
             self.img_list.append(src)
-
 
 
 if __name__ == "__main__":
@@ -102,8 +130,7 @@ if __name__ == "__main__":
     #book_info.scroll(rep=3)
     #book_info.infinite_scroll()
     book_info.get_links()
-    book_info.get_text_data()
-    book_info.get_img_data()
+    book_info.get_data()
     book_dict_list = []
 
     for index in range(len(book_info.link_list)):
