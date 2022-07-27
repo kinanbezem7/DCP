@@ -10,3 +10,14 @@ Generated unique ID's for each product then organised it into a list of dictiona
 The raw data is stored locally in folders for each product. 
 The pictures are also downloaded and stored in their respective folders. 
 There was an issue using urlib and so I had to use requests library.
+
+MILESTONE 3 
+Extracted text and images links for each book. 
+Generated unique id's for each book. 
+Organise the data into a list of dictionaries. 
+Download the image links.
+Save the data of each book into their respective folders organised by the ISBN number. 
+
+MILESTONE 4 
+Generate a unit test file in order to check the datatypes of the outputs of each method in the Scraper class. 
+Generate a integration test file in order to check the file integrety of the saved data

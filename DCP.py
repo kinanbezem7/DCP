@@ -123,18 +123,14 @@ class Scraper:
             src = img_tag.get_attribute('src')
             self.img_list.append(src)
 
+    def save_data_files(self):
 
-if __name__ == "__main__":
-    book_info = Scraper(URL = "https://www.waterstones.com/campaign/special-editions")
-    book_info.accept_cookies()
-    #book_info.scroll(rep=3)
-    #book_info.infinite_scroll()
-    book_info.get_links()
-    book_info.get_data()
-    book_dict_list = []
+        """Method for saving the data and images gathered to their respective folders and json files"""
+        
+        book_dict_list = []
 
-    for index in range(len(book_info.link_list)):
-        book_dict_list.append({'ID': book_info.id_list[index], 'ISBN': book_info.isbn_list[index], 'Price': book_info.price_list[index], 'Name': book_info.name_list[index], 'Price': book_info.price_list[index]})
+        for index in range(len(book_info.link_list)):
+            book_dict_list.append({'ID': book_info.id_list[index], 'ISBN': book_info.isbn_list[index], 'Price': book_info.price_list[index], 'Name': book_info.name_list[index]})
         try:
             os.mkdir(os.path.join('raw_data', str(book_dict_list[index]['ISBN'])))
 
@@ -148,6 +144,38 @@ if __name__ == "__main__":
         image = requests.get(str(book_info.img_list[index])).content
         with open(''.join(path), "wb") as outimage:
             outimage.write(image)
+
+
+if __name__ == "__main__":
+    book_info = Scraper(URL = "https://www.waterstones.com/campaign/special-editions")
+    book_info.accept_cookies()
+    #book_info.scroll(rep=3)
+    #book_info.infinite_scroll()
+    book_info.get_links()
+    book_info.get_data()
+    book_info.save_data_files()
+
+
+
+"""
+    book_dict_list = []
+
+
+     for index in range(len(book_info.link_list)):
+        book_dict_list.append({'ID': book_info.id_list[index], 'ISBN': book_info.isbn_list[index], 'Price': book_info.price_list[index], 'Name': book_info.name_list[index]})
+        try:
+            os.mkdir(os.path.join('raw_data', str(book_dict_list[index]['ISBN'])))
+
+        except FileExistsError:
+            print("Directory already exists")
+
+        with open(os.path.join('raw_data', str(book_dict_list[index]['ISBN']),'data.json'), 'w') as fp:
+            json.dump(book_dict_list[index], fp)
+
+        path = ['raw_data/', str(book_dict_list[index]['ISBN']), '/',  str(book_dict_list[index]['ISBN']), '.jpg' ]
+        image = requests.get(str(book_info.img_list[index])).content
+        with open(''.join(path), "wb") as outimage:
+            outimage.write(image) """
 
 
 
