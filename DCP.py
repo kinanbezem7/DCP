@@ -9,7 +9,8 @@ import uuid
 import os
 import json
 import requests
-
+import boto3 
+s3_client = boto3.client('s3')
 
 
 
@@ -150,6 +151,17 @@ class Scraper:
             image = requests.get(str(img_list[index])).content
             with open(''.join(path), "wb") as outimage:
                 outimage.write(image)
+
+            # file_name = [str(book_dict_list[index]['ISBN']),".jpg"]
+            # file_name_output = [str(book_dict_list[index]['ISBN']),".json"]
+            file_name_img = ['raw_data/', str(book_dict_list[index]['ISBN']), '/',  str(book_dict_list[index]['ISBN']), '.jpg' ]
+            file_name_img_output = [str(book_dict_list[index]['ISBN']),".jpg"]
+            file_name_json = ['raw_data/', str(book_dict_list[index]['ISBN']), '/', 'data.json' ]
+            file_name_json_output = [str(book_dict_list[index]['ISBN']),".json"]
+
+            response1 = s3_client.upload_file(''.join(file_name_img), 'dcprawdata', ''.join(file_name_img_output))
+            response2 = s3_client.upload_file(''.join(file_name_json), 'dcprawdata', ''.join(file_name_json_output))
+
 
 
 if __name__ == "__main__":
