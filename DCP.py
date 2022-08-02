@@ -97,6 +97,28 @@ class Scraper:
             link_list.append(link)
 
         return link_list
+
+    def rescrape(self, link_list):
+
+        total_isbn_list = os.listdir("raw_data")
+        tot_link_list = []
+        new_link_list = []
+        for index in range(len(total_isbn_list)):
+            f = open(os.path.join('raw_data', str(total_isbn_list[index]),'data.json'), 'r')
+            data = json.load(f)
+            url = data["link"]
+            tot_link_list.append(url)
+            
+
+        for element in link_list:
+            if element in tot_link_list:
+                pass
+            else: 
+                new_link_list.append(element)
+        return new_link_list
+
+
+
         
     def get_data(self, link_list):
         """ 
@@ -141,7 +163,7 @@ class Scraper:
         book_dict_list = []
 
         for index in range(len(link_list)):
-            book_dict_list.append({'ID': id_list[index], 'ISBN': isbn_list[index], 'Price': price_list[index], 'Name': name_list[index]})
+            book_dict_list.append({'ID': id_list[index], 'ISBN': isbn_list[index], 'Price': price_list[index], 'Name': name_list[index], 'link': link_list[index]})
             if save_to_local == TRUE:
                 try:
                     path = ['raw_data/', str(book_dict_list[index]['ISBN'])]
@@ -202,17 +224,19 @@ class Scraper:
 if __name__ == "__main__":
     save_to_rds = FALSE
     save_to_s3_from_file = FALSE
-    save_to_local = FALSE
-    save_to_s3 = TRUE
+    save_to_local = TRUE
+    save_to_s3 = FALSE
 
     book_info = Scraper(URL = "https://www.waterstones.com/campaign/special-editions")
     book_info.accept_cookies()
     #book_info.scroll(rep=3)
     #book_info.infinite_scroll()
     link_list = book_info.get_links()
-    price_list, name_list, isbn_list, id_list, img_list = book_info.get_data(link_list)
-    book_info.save_data_files(link_list, price_list, name_list, isbn_list, id_list, img_list, save_to_rds, save_to_s3_from_file, save_to_local, save_to_s3)
+    link_list = book_info.rescrape(link_list)
+    print(link_list)
 
+    #price_list, name_list, isbn_list, id_list, img_list = book_info.get_data(link_list)
+    #book_info.save_data_files(link_list, price_list, name_list, isbn_list, id_list, img_list, save_to_rds, save_to_s3_from_file, save_to_local, save_to_s3)
 
 
 """
