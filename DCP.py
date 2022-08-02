@@ -98,23 +98,46 @@ class Scraper:
 
         return link_list
 
-    def rescrape(self, link_list):
-
-        total_isbn_list = os.listdir("raw_data")
+    def rescrape(self, link_list, save_to_local, save_to_rds):
         tot_link_list = []
         new_link_list = []
-        for index in range(len(total_isbn_list)):
-            f = open(os.path.join('raw_data', str(total_isbn_list[index]),'data.json'), 'r')
-            data = json.load(f)
-            url = data["link"]
-            tot_link_list.append(url)
-            
+        if save_to_local == TRUE:
+            total_isbn_list = os.listdir("raw_data")
+            for index in range(len(total_isbn_list)):
+                f = open(os.path.join('raw_data', str(total_isbn_list[index]),'data.json'), 'r')
+                data = json.load(f)
+                url = data["link"]
+                tot_link_list.append(url)
+                
 
-        for element in link_list:
-            if element in tot_link_list:
-                pass
-            else: 
-                new_link_list.append(element)
+            for element in link_list:
+                if element in tot_link_list:
+                    pass
+                else: 
+                    new_link_list.append(element)
+        
+        if save_to_rds == TRUE:
+            DATABASE_TYPE = 'postgresql'
+            DBAPI = 'psycopg2'
+            HOST = 'dcp.c1vhfqtykqij.us-east-1.rds.amazonaws.com'
+            USER = 'postgres'
+            PASSWORD = 'Nazim79737?'
+            DATABASE = 'postgres'
+            PORT = 5432
+            engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}")
+            engine.connect()
+            inspector = inspect(engine)
+            inspector.get_table_names()
+            tot_link_list = pd.read_sql_table('special_edition', engine)
+            tot_link_list = tot_link_list.loc[:,"link"]
+            tot_link_list = tot_link_list.tolist()
+            
+            for element in link_list:
+                if element in tot_link_list:
+                    pass
+                else: 
+                    new_link_list.append(element)
+
         return new_link_list
 
 
@@ -213,28 +236,27 @@ class Scraper:
             df = pd.DataFrame(book_dict_list)
             engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}")
             df.to_sql('special_edition', engine, if_exists="replace")
-            engine.connect()
-            inspector = inspect(engine)
-            inspector.get_table_names()
-            engine.execute('''SELECT * FROM special_edition''').fetchall()
+            # engine.connect()
+            # inspector = inspect(engine)
+            # inspector.get_table_names()
+            # engine.execute('''SELECT * FROM special_edition''').fetchall()
 
 
 
 
 if __name__ == "__main__":
-    save_to_rds = FALSE
+    save_to_rds = TRUE
     save_to_s3_from_file = FALSE
-    save_to_local = TRUE
+    save_to_local = FALSE
     save_to_s3 = FALSE
 
-    book_info = Scraper(URL = "https://www.waterstones.com/campaign/special-editions")
+    #book_info = Scraper(URL = "https://www.waterstones.com/campaign/special-editions")
+    book_info = Scraper(URL = "https://www.waterstones.com/campaign/summer")
     book_info.accept_cookies()
     #book_info.scroll(rep=3)
     #book_info.infinite_scroll()
     link_list = book_info.get_links()
-    link_list = book_info.rescrape(link_list)
-    print(link_list)
-
+    link_list = book_info.rescrape(link_list, save_to_local, save_to_rds)
     #price_list, name_list, isbn_list, id_list, img_list = book_info.get_data(link_list)
     #book_info.save_data_files(link_list, price_list, name_list, isbn_list, id_list, img_list, save_to_rds, save_to_s3_from_file, save_to_local, save_to_s3)
 
