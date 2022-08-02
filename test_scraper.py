@@ -13,9 +13,12 @@ class ScraperTestCase(unittest.TestCase):
 
         book_info = Scraper(URL = "https://www.waterstones.com/campaign/special-editions")
         book_info.accept_cookies()
-        book_info.get_links()
-        book_info.get_data()
-        self.assertIsInstance(book_info.link_list[0], str)
-        self.assertIsInstance(book_info.name_list[0], str)
-        self.assertIsInstance(book_info.price_list[0], str, float)
-        self.assertIsInstance(book_info.isbn_list[0], str)
+        link_list = book_info.get_links()
+        price_list, name_list, isbn_list, id_list, img_list = book_info.get_data(link_list)
+        self.assertIsInstance(link_list[0], str)
+        self.assertIsInstance(name_list[0], str)
+        self.assertIsInstance(price_list[0], str, float)
+        self.assertIsInstance(isbn_list[0], str)
+
+
+unittest.main(argv=[''], verbosity=2, exit=False)

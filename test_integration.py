@@ -14,23 +14,23 @@ class ScraperTestCase(unittest.TestCase):
 
         book_info = Scraper(URL = "https://www.waterstones.com/campaign/special-editions")
         book_info.accept_cookies()
-        book_info.get_links()
-        book_info.get_data()
+        link_list = book_info.get_links()
+        price_list, name_list, isbn_list, id_list, img_list = book_info.get_data(link_list)
 
-        for index in range(len(book_info.link_list)):
+        for index in range(len(link_list)):
             #test data.json
              try: 
-                with open(os.path.join('raw_data', str(book_info.isbn_list[index]), 'data.json')) as f: 
+                with open(os.path.join('raw_data', str(isbn_list[index]), 'data.json')) as f: 
                     return json.load(f) 
 
              except ValueError as e: 
                 print('invalid json: %s' % e) 
                 return None
 
-        for index in range(len(book_info.link_list)):
+        for index in range(len(link_list)):
             #test img file
              try: 
-                with open(os.path.join('raw_data', str(book_info.isbn_list[index]), str(book_info.isbn_list[index]), '.jpg')) as f: 
+                with open(os.path.join('raw_data', str(isbn_list[index]), str(isbn_list[index]), '.jpg')) as f: 
                     return f.verify() 
 
              except ValueError as e: 
