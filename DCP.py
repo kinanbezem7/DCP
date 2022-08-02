@@ -10,6 +10,13 @@ import os
 import json
 import requests
 import boto3 
+import pandas as pd
+import psycopg2
+from sqlalchemy import create_engine
+from sqlalchemy import inspect
+
+
+
 s3_client = boto3.client('s3')
 
 
@@ -127,7 +134,7 @@ class Scraper:
             img_list.append(src)
         return price_list, name_list, isbn_list, id_list, img_list
 
-    def save_data_files(self, link_list, price_list, name_list, isbn_list, id_list, img_list):
+    def save_data_files(self, link_list, price_list, name_list, isbn_list, id_list, img_list, save_to_rds, save_to_s3_from_file, save_to_local, save_to_s3):
 
         """Method for saving the data and images gathered to their respective folders and json files"""
         
@@ -135,43 +142,76 @@ class Scraper:
 
         for index in range(len(link_list)):
             book_dict_list.append({'ID': id_list[index], 'ISBN': isbn_list[index], 'Price': price_list[index], 'Name': name_list[index]})
+            if save_to_local == TRUE:
+                try:
+                    path = ['raw_data/', str(book_dict_list[index]['ISBN'])]
+                    os.mkdir(''.join(path))
+                    
+                except FileExistsError:
+                    print("Directory already exists")
 
-            try:
-                path = ['raw_data/', str(book_dict_list[index]['ISBN'])]
-                os.mkdir(''.join(path))
-                
-            except FileExistsError:
-                print("Directory already exists")
+
+                with open(os.path.join('raw_data', str(book_dict_list[index]['ISBN']),'data.json'), 'w') as fp:
+                    json.dump(book_dict_list[index], fp)
+
+                path = ['raw_data/', str(book_dict_list[index]['ISBN']), '/',  str(book_dict_list[index]['ISBN']), '.jpg' ]
+                image = requests.get(str(img_list[index])).content
+                with open(''.join(path), "wb") as outimage:
+                    outimage.write(image)
+
+                if save_to_s3_from_file == TRUE:
+                    file_name_img = ['raw_data/', str(book_dict_list[index]['ISBN']), '/',  str(book_dict_list[index]['ISBN']), '.jpg' ]
+                    file_name_img_output = [str(book_dict_list[index]['ISBN']),".jpg"]
+                    file_name_json = ['raw_data/', str(book_dict_list[index]['ISBN']), '/', 'data.json' ]
+                    file_name_json_output = [str(book_dict_list[index]['ISBN']),".json"]
+
+                    s3_client.upload_file(''.join(file_name_img), 'dcprawdata', ''.join(file_name_img_output))
+                    s3_client.upload_file(''.join(file_name_json), 'dcprawdata', ''.join(file_name_json_output))
 
 
-            with open(os.path.join('raw_data', str(book_dict_list[index]['ISBN']),'data.json'), 'w') as fp:
-                json.dump(book_dict_list[index], fp)
+            if save_to_s3 == TRUE:
+                session = boto3.Session()
+                s3h = session.resource('s3')
+                bucket = s3h.Bucket('dcprawdata')
+                image = requests.get(str(img_list[index]), stream=TRUE)
+                key = [ str(book_dict_list[index]['ISBN']), '.jpg' ]
+                bucket.upload_fileobj(image.raw, ''.join(key))
 
-            path = ['raw_data/', str(book_dict_list[index]['ISBN']), '/',  str(book_dict_list[index]['ISBN']), '.jpg' ]
-            image = requests.get(str(img_list[index])).content
-            with open(''.join(path), "wb") as outimage:
-                outimage.write(image)
 
-            # file_name = [str(book_dict_list[index]['ISBN']),".jpg"]
-            # file_name_output = [str(book_dict_list[index]['ISBN']),".json"]
-            file_name_img = ['raw_data/', str(book_dict_list[index]['ISBN']), '/',  str(book_dict_list[index]['ISBN']), '.jpg' ]
-            file_name_img_output = [str(book_dict_list[index]['ISBN']),".jpg"]
-            file_name_json = ['raw_data/', str(book_dict_list[index]['ISBN']), '/', 'data.json' ]
-            file_name_json_output = [str(book_dict_list[index]['ISBN']),".json"]
 
-            response1 = s3_client.upload_file(''.join(file_name_img), 'dcprawdata', ''.join(file_name_img_output))
-            response2 = s3_client.upload_file(''.join(file_name_json), 'dcprawdata', ''.join(file_name_json_output))
+        if save_to_rds == TRUE:
+            DATABASE_TYPE = 'postgresql'
+            DBAPI = 'psycopg2'
+            HOST = 'dcp.c1vhfqtykqij.us-east-1.rds.amazonaws.com'
+            USER = 'postgres'
+            PASSWORD = 'Nazim79737?'
+            DATABASE = 'postgres'
+            PORT = 5432
+
+            df = pd.DataFrame(book_dict_list)
+            engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}")
+            df.to_sql('special_edition', engine, if_exists="replace")
+            engine.connect()
+            inspector = inspect(engine)
+            inspector.get_table_names()
+            engine.execute('''SELECT * FROM special_edition''').fetchall()
+
 
 
 
 if __name__ == "__main__":
+    save_to_rds = FALSE
+    save_to_s3_from_file = FALSE
+    save_to_local = FALSE
+    save_to_s3 = TRUE
+
     book_info = Scraper(URL = "https://www.waterstones.com/campaign/special-editions")
     book_info.accept_cookies()
     #book_info.scroll(rep=3)
     #book_info.infinite_scroll()
     link_list = book_info.get_links()
     price_list, name_list, isbn_list, id_list, img_list = book_info.get_data(link_list)
-    book_info.save_data_files(link_list, price_list, name_list, isbn_list, id_list, img_list)
+    book_info.save_data_files(link_list, price_list, name_list, isbn_list, id_list, img_list, save_to_rds, save_to_s3_from_file, save_to_local, save_to_s3)
 
 
 

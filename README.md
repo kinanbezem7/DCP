@@ -21,3 +21,8 @@ Save the data of each book into their respective folders organised by the ISBN n
 MILESTONE 4 
 Generate a unit test file in order to check the datatypes of the outputs of each method in the Scraper class. 
 Generate a integration test file in order to check the file integrety of the saved data
+
+MILESTONE 5
+Uploaded raw data into s3 bucket using boto3
+Uploaded tabular data to RDS using psycopg2 and sqlalchemy
+Option to upload image data directly to s3
