@@ -137,7 +137,7 @@ class Scraper:
                     pass
                 else: 
                     new_link_list.append(element)
-
+        
         return new_link_list
 
 
@@ -184,6 +184,15 @@ class Scraper:
         """Method for saving the data and images gathered to their respective folders and json files"""
         
         book_dict_list = []
+        
+        if save_to_s3 == TRUE:
+            tot_img_list = []
+            session = boto3.Session()
+            s3h = session.resource('s3')
+            bucket = s3h.Bucket('dcprawdata')
+            for obj in bucket.objects.all():
+                if obj.key.endswith('jpg'):
+                    tot_img_list.append(obj.key)
 
         for index in range(len(link_list)):
             book_dict_list.append({'ID': id_list[index], 'ISBN': isbn_list[index], 'Price': price_list[index], 'Name': name_list[index], 'link': link_list[index]})
@@ -215,13 +224,10 @@ class Scraper:
 
 
             if save_to_s3 == TRUE:
-                session = boto3.Session()
-                s3h = session.resource('s3')
-                bucket = s3h.Bucket('dcprawdata')
                 image = requests.get(str(img_list[index]), stream=TRUE)
                 key = [ str(book_dict_list[index]['ISBN']), '.jpg' ]
-                bucket.upload_fileobj(image.raw, ''.join(key))
-
+                if ''.join(key) not in tot_img_list: 
+                    bucket.upload_fileobj(image.raw, ''.join(key))
 
 
         if save_to_rds == TRUE:
@@ -236,50 +242,30 @@ class Scraper:
             df = pd.DataFrame(book_dict_list)
             engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}")
             df.to_sql('special_edition', engine, if_exists="replace")
-            # engine.connect()
-            # inspector = inspect(engine)
-            # inspector.get_table_names()
-            # engine.execute('''SELECT * FROM special_edition''').fetchall()
+
 
 
 
 
 if __name__ == "__main__":
-    save_to_rds = TRUE
-    save_to_s3_from_file = FALSE
+    save_to_rds = FALSE
+    save_to_s3_from_file = FALSE 
     save_to_local = FALSE
-    save_to_s3 = FALSE
+    save_to_s3 = TRUE
 
-    #book_info = Scraper(URL = "https://www.waterstones.com/campaign/special-editions")
-    book_info = Scraper(URL = "https://www.waterstones.com/campaign/summer")
+    book_info = Scraper(URL = "https://www.waterstones.com/campaign/special-editions")
+    #book_info = Scraper(URL = "https://www.waterstones.com/campaign/summer")
     book_info.accept_cookies()
     #book_info.scroll(rep=3)
     #book_info.infinite_scroll()
     link_list = book_info.get_links()
-    link_list = book_info.rescrape(link_list, save_to_local, save_to_rds)
-    #price_list, name_list, isbn_list, id_list, img_list = book_info.get_data(link_list)
-    #book_info.save_data_files(link_list, price_list, name_list, isbn_list, id_list, img_list, save_to_rds, save_to_s3_from_file, save_to_local, save_to_s3)
+    if save_to_local == TRUE or save_to_rds == TRUE:
+        link_list = book_info.rescrape(link_list, save_to_local, save_to_rds)
+    print("get data")
+    price_list, name_list, isbn_list, id_list, img_list = book_info.get_data(link_list)
+    print("save data")
+    book_info.save_data_files(link_list, price_list, name_list, isbn_list, id_list, img_list, save_to_rds, save_to_s3_from_file, save_to_local, save_to_s3)
 
-
-"""
-    book_dict_list = []
-
-
-     for index in range(len(book_info.link_list)):
-        book_dict_list.append({'ID': book_info.id_list[index], 'ISBN': book_info.isbn_list[index], 'Price': book_info.price_list[index], 'Name': book_info.name_list[index]})
-        try:
-            os.mkdir(os.path.join('raw_data', str(book_dict_list[index]['ISBN'])))
-
-        except FileExistsError:
-            print("Directory already exists")
-
-        with open(os.path.join('raw_data', str(book_dict_list[index]['ISBN']),'data.json'), 'w') as fp:
-            json.dump(book_dict_list[index], fp)
-
-        path = ['raw_data/', str(book_dict_list[index]['ISBN']), '/',  str(book_dict_list[index]['ISBN']), '.jpg' ]
-        image = requests.get(str(book_info.img_list[index])).content
-        with open(''.join(path), "wb") as outimage:
-            outimage.write(image) """
 
 
 
