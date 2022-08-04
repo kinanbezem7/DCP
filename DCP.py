@@ -113,7 +113,21 @@ class Scraper:
     def rescrape(self, link_list, save_to_local, save_to_rds, engine):
         tot_link_list = []
         new_link_list = []
-        if save_to_local == TRUE:
+
+        if save_to_rds == TRUE:
+            inspector = inspect(engine)
+            inspector.get_table_names()
+            tot_link_list = pd.read_sql_table('special_edition', engine)
+            tot_link_list = tot_link_list.loc[:,"link"]
+            tot_link_list = tot_link_list.tolist()
+            
+            for element in link_list:
+                if element in tot_link_list:
+                    pass
+                else: 
+                    new_link_list.append(element)
+
+        if save_to_local == TRUE and save_to_rds == FALSE:
             total_isbn_list = os.listdir("raw_data")
             for index in range(len(total_isbn_list)):
                 f = open(os.path.join('raw_data', str(total_isbn_list[index]),'data.json'), 'r')
@@ -127,20 +141,7 @@ class Scraper:
                     pass
                 else: 
                     new_link_list.append(element)
-        
-        if save_to_rds == TRUE:
-            inspector = inspect(engine)
-            inspector.get_table_names()
-            tot_link_list = pd.read_sql_table('special_edition', engine)
-            tot_link_list = tot_link_list.loc[:,"link"]
-            tot_link_list = tot_link_list.tolist()
-            
-            for element in link_list:
-                if element in tot_link_list:
-                    pass
-                else: 
-                    new_link_list.append(element)
-        
+                
         return new_link_list
 
 
