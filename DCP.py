@@ -193,21 +193,12 @@ class Scraper:
         save_to_rds, 
         save_to_s3_from_file, 
         save_to_local, 
-        save_to_s3,
         engine):
 
         """Method for saving the data and images gathered to their respective folders and json files"""
         
         book_dict_list = []
         
-        if save_to_s3 == TRUE:
-            tot_img_list = []
-            session = boto3.Session()
-            s3h = session.resource('s3')
-            bucket = s3h.Bucket('dcprawdata')
-            for obj in bucket.objects.all():
-                if obj.key.endswith('jpg'):
-                    tot_img_list.append(obj.key)
 
         for index in range(len(link_list)):
             book_dict_list.append({'ID': id_list[index], 'ISBN': isbn_list[index], 'Price': price_list[index], 'Name': name_list[index], 'link': link_list[index]})
@@ -237,42 +228,86 @@ class Scraper:
                     s3_client.upload_file(''.join(file_name_img), 'dcprawdata', ''.join(file_name_img_output))
                     s3_client.upload_file(''.join(file_name_json), 'dcprawdata', ''.join(file_name_json_output))
 
-
-            if save_to_s3 == TRUE:
-                image = requests.get(str(img_list[index]), stream=TRUE)
-                key = [ str(book_dict_list[index]['ISBN']), '.jpg' ]
-                if ''.join(key) not in tot_img_list: 
-                    bucket.upload_fileobj(image.raw, ''.join(key))
-
-
         if save_to_rds == TRUE:
             df = pd.DataFrame(book_dict_list)
             df.to_sql('special_edition', engine, if_exists="replace")
 
+    def save_to_s3(
+        self,         
+        link_list, 
+        price_list, 
+        name_list, 
+        isbn_list, 
+        id_list, 
+        img_list):
 
+        book_dict_list = []
+        tot_img_list = []
+        tot_json_list = []
+
+        obj_list = []
+        session = boto3.Session()
+        s3h = session.resource('s3')
+        bucket = s3h.Bucket('dcprawdata')
+        for obj in bucket.objects.all():
+            if obj.key.endswith('jpg'):
+                tot_img_list.append(obj.key)
+            elif obj.key.endswith('json'):
+                tot_json_list.append(obj.key)
+            obj_list.append(obj)
+
+        if "raw_data/" not in obj_list:
+            s3_client.put_object(Bucket='dcprawdata', Body='',Key='raw_data/')
+            for index in range(len(link_list)):
+                book_dict_list.append({'ID': id_list[index], 'ISBN': isbn_list[index], 'Price': price_list[index], 'Name': name_list[index], 'link': link_list[index]})
+                image = requests.get(str(img_list[index]), stream=TRUE)
+                key_img = ['raw_data/', str(book_dict_list[index]['ISBN']), '.jpg']
+                key_json = ['raw_data/', str(book_dict_list[index]['ISBN']), '.json']
+                if ''.join(key_img) not in tot_img_list: 
+                    bucket.upload_fileobj(image.raw, ''.join(key_img))
+                if ''.join(key_json) not in tot_json_list: 
+                    json_object = book_dict_list[index]
+                    s3_client.put_object(Body=json.dumps(json_object), Bucket='dcprawdata', Key=''.join(key_json))
+
+
+        else:
+            for index in range(len(link_list)):
+                book_dict_list.append({'ID': id_list[index], 'ISBN': isbn_list[index], 'Price': price_list[index], 'Name': name_list[index], 'link': link_list[index]})
+                image = requests.get(str(img_list[index]), stream=TRUE)
+                key_img = ['raw_data/', str(book_dict_list[index]['ISBN']), '.jpg']
+                key_json = ['raw_data/', str(book_dict_list[index]['ISBN']), '.json']
+                if ''.join(key_img) not in tot_img_list: 
+                    bucket.upload_fileobj(image.raw, ''.join(key_img))
+                if ''.join(key_json) not in tot_json_list: 
+                    json_object = book_dict_list[index]
+                    s3_client.put_object(Body=json.dumps(json_object), Bucket='dcprawdata', Key=''.join(key_json))
 
 
 
 if __name__ == "__main__":
-    save_to_rds = TRUE
+    save_to_rds = FALSE
     save_to_s3_from_file = FALSE 
     save_to_local = FALSE
-    save_to_s3 = FALSE # Upload images to s3 Bucket
+    save_to_s3 = TRUE # Upload images to s3 Bucket
 
     book_info = Scraper(URL = "https://www.waterstones.com/campaign/special-editions")
     #book_info = Scraper(URL = "https://www.waterstones.com/campaign/summer")
     book_info.accept_cookies()
     #book_info.scroll(rep=3)
     #book_info.infinite_scroll()
+    print("get links")
     link_list = book_info.get_links()
+    print("get engine")
     engine = book_info.initialise_database()
+    print("save")
     if save_to_local == TRUE or save_to_rds == TRUE:
         link_list = book_info.rescrape(link_list, save_to_local, save_to_rds, engine)
     print("get data")
     price_list, name_list, isbn_list, id_list, img_list = book_info.get_data(link_list)
     print("save data")
-    book_info.save_data_files(link_list, price_list, name_list, isbn_list, id_list, img_list, save_to_rds, save_to_s3_from_file, save_to_local, save_to_s3, engine)
-
+    book_info.save_data_files(link_list, price_list, name_list, isbn_list, id_list, img_list, save_to_rds, save_to_s3_from_file, save_to_local, engine)
+    if save_to_s3 == TRUE:
+        book_info.save_to_s3(link_list, price_list, name_list, isbn_list, id_list, img_list)
 
 
 
