@@ -14,6 +14,7 @@ import pandas as pd
 import psycopg2
 from sqlalchemy import create_engine
 from sqlalchemy import inspect
+from selenium.webdriver.chrome.options import Options
 
 
 
@@ -39,7 +40,10 @@ class Scraper:
         '''
         See help(Scraper) for accurate signature
         '''
-        self.driver = webdriver.Chrome() 
+        options = Options()
+        options.add_argument("--headless") 
+        options.add_argument("user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36")
+        self.driver = webdriver.Chrome(options=options) 
         self.driver.get(URL)
         
     
@@ -288,11 +292,12 @@ class Scraper:
 if __name__ == "__main__":
     save_to_rds = FALSE
     save_to_s3_from_file = FALSE 
-    save_to_local = FALSE
-    save_to_s3 = TRUE # Upload images to s3 Bucket
+    save_to_local = TRUE
+    save_to_s3 = FALSE # Upload images to s3 Bucket
 
     book_info = Scraper(URL = "https://www.waterstones.com/campaign/special-editions")
     #book_info = Scraper(URL = "https://www.waterstones.com/campaign/summer")
+    print("Accept cookies")
     book_info.accept_cookies()
     #book_info.scroll(rep=3)
     #book_info.infinite_scroll()
