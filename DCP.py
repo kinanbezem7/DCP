@@ -263,40 +263,40 @@ class Scraper:
 
         if "raw_data/" not in obj_list:
             s3_client.put_object(Bucket='dcprawdata', Body='',Key='raw_data/')
-            for index in range(len(link_list)):
-                book_dict_list.append({'ID': id_list[index], 'ISBN': isbn_list[index], 'Price': price_list[index], 'Name': name_list[index], 'link': link_list[index]})
-                image = requests.get(str(img_list[index]), stream=TRUE)
-                key_img = ['raw_data/', str(book_dict_list[index]['ISBN']), '.jpg']
-                key_json = ['raw_data/', str(book_dict_list[index]['ISBN']), '.json']
-                if ''.join(key_img) not in tot_img_list: 
-                    bucket.upload_fileobj(image.raw, ''.join(key_img))
-                if ''.join(key_json) not in tot_json_list: 
-                    json_object = book_dict_list[index]
-                    s3_client.put_object(Body=json.dumps(json_object), Bucket='dcprawdata', Key=''.join(key_json))
+        for index in range(len(link_list)):
+            book_dict_list.append({'ID': id_list[index], 'ISBN': isbn_list[index], 'Price': price_list[index], 'Name': name_list[index], 'link': link_list[index]})
+            image = requests.get(str(img_list[index]), stream=TRUE)
+            key_img = ['raw_data/', str(book_dict_list[index]['ISBN']), '.jpg']
+            key_json = ['raw_data/', str(book_dict_list[index]['ISBN']), '.json']
+            if ''.join(key_img) not in tot_img_list: 
+                bucket.upload_fileobj(image.raw, ''.join(key_img))
+            if ''.join(key_json) not in tot_json_list: 
+                json_object = book_dict_list[index]
+                s3_client.put_object(Body=json.dumps(json_object), Bucket='dcprawdata', Key=''.join(key_json))
 
 
-        else:
-            for index in range(len(link_list)):
-                book_dict_list.append({'ID': id_list[index], 'ISBN': isbn_list[index], 'Price': price_list[index], 'Name': name_list[index], 'link': link_list[index]})
-                image = requests.get(str(img_list[index]), stream=TRUE)
-                key_img = ['raw_data/', str(book_dict_list[index]['ISBN']), '.jpg']
-                key_json = ['raw_data/', str(book_dict_list[index]['ISBN']), '.json']
-                if ''.join(key_img) not in tot_img_list: 
-                    bucket.upload_fileobj(image.raw, ''.join(key_img))
-                if ''.join(key_json) not in tot_json_list: 
-                    json_object = book_dict_list[index]
-                    s3_client.put_object(Body=json.dumps(json_object), Bucket='dcprawdata', Key=''.join(key_json))
+        # else:
+        #     for index in range(len(link_list)):
+        #         book_dict_list.append({'ID': id_list[index], 'ISBN': isbn_list[index], 'Price': price_list[index], 'Name': name_list[index], 'link': link_list[index]})
+        #         image = requests.get(str(img_list[index]), stream=TRUE)
+        #         key_img = ['raw_data/', str(book_dict_list[index]['ISBN']), '.jpg']
+        #         key_json = ['raw_data/', str(book_dict_list[index]['ISBN']), '.json']
+        #         if ''.join(key_img) not in tot_img_list: 
+        #             bucket.upload_fileobj(image.raw, ''.join(key_img))
+        #         if ''.join(key_json) not in tot_json_list: 
+        #             json_object = book_dict_list[index]
+        #             s3_client.put_object(Body=json.dumps(json_object), Bucket='dcprawdata', Key=''.join(key_json))
 
 
 
 if __name__ == "__main__":
     save_to_rds = FALSE
     save_to_s3_from_file = FALSE 
-    save_to_local = TRUE
-    save_to_s3 = FALSE # Upload images to s3 Bucket
+    save_to_local = FALSE
+    save_to_s3 = TRUE # Upload images to s3 Bucket
 
-    book_info = Scraper(URL = "https://www.waterstones.com/campaign/special-editions")
-    #book_info = Scraper(URL = "https://www.waterstones.com/campaign/summer")
+    #book_info = Scraper(URL = "https://www.waterstones.com/campaign/special-editions")
+    book_info = Scraper(URL = "https://www.waterstones.com/campaign/summer")
     print("Accept cookies")
     book_info.accept_cookies()
     #book_info.scroll(rep=3)
