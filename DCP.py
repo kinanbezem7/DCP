@@ -80,6 +80,18 @@ class Scraper:
             except:
                 x = FALSE
 
+    def initialise_database(self):
+            DATABASE_TYPE = 'postgresql'
+            DBAPI = 'psycopg2'
+            HOST = 'dcp.c1vhfqtykqij.us-east-1.rds.amazonaws.com'
+            USER = 'postgres'
+            PASSWORD = 'Nazim79737?'
+            DATABASE = 'postgres'
+            PORT = 5432
+            engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}")
+            engine.connect()
+            return engine
+
     def get_links(self):
         """ 
         Method for getting the links of all the books in the loaded list 
@@ -98,7 +110,7 @@ class Scraper:
 
         return link_list
 
-    def rescrape(self, link_list, save_to_local, save_to_rds):
+    def rescrape(self, link_list, save_to_local, save_to_rds, engine):
         tot_link_list = []
         new_link_list = []
         if save_to_local == TRUE:
@@ -117,15 +129,6 @@ class Scraper:
                     new_link_list.append(element)
         
         if save_to_rds == TRUE:
-            DATABASE_TYPE = 'postgresql'
-            DBAPI = 'psycopg2'
-            HOST = 'dcp.c1vhfqtykqij.us-east-1.rds.amazonaws.com'
-            USER = 'postgres'
-            PASSWORD = 'Nazim79737?'
-            DATABASE = 'postgres'
-            PORT = 5432
-            engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}")
-            engine.connect()
             inspector = inspect(engine)
             inspector.get_table_names()
             tot_link_list = pd.read_sql_table('special_edition', engine)
@@ -179,7 +182,19 @@ class Scraper:
             img_list.append(src)
         return price_list, name_list, isbn_list, id_list, img_list
 
-    def save_data_files(self, link_list, price_list, name_list, isbn_list, id_list, img_list, save_to_rds, save_to_s3_from_file, save_to_local, save_to_s3):
+    def save_data_files(
+        self, 
+        link_list, 
+        price_list, 
+        name_list, 
+        isbn_list, 
+        id_list, 
+        img_list, 
+        save_to_rds, 
+        save_to_s3_from_file, 
+        save_to_local, 
+        save_to_s3,
+        engine):
 
         """Method for saving the data and images gathered to their respective folders and json files"""
         
@@ -231,16 +246,7 @@ class Scraper:
 
 
         if save_to_rds == TRUE:
-            DATABASE_TYPE = 'postgresql'
-            DBAPI = 'psycopg2'
-            HOST = 'dcp.c1vhfqtykqij.us-east-1.rds.amazonaws.com'
-            USER = 'postgres'
-            PASSWORD = 'Nazim79737?'
-            DATABASE = 'postgres'
-            PORT = 5432
-
             df = pd.DataFrame(book_dict_list)
-            engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}")
             df.to_sql('special_edition', engine, if_exists="replace")
 
 
@@ -248,10 +254,10 @@ class Scraper:
 
 
 if __name__ == "__main__":
-    save_to_rds = FALSE
+    save_to_rds = TRUE
     save_to_s3_from_file = FALSE 
     save_to_local = FALSE
-    save_to_s3 = TRUE
+    save_to_s3 = FALSE # Upload images to s3 Bucket
 
     book_info = Scraper(URL = "https://www.waterstones.com/campaign/special-editions")
     #book_info = Scraper(URL = "https://www.waterstones.com/campaign/summer")
@@ -259,12 +265,13 @@ if __name__ == "__main__":
     #book_info.scroll(rep=3)
     #book_info.infinite_scroll()
     link_list = book_info.get_links()
+    engine = book_info.initialise_database()
     if save_to_local == TRUE or save_to_rds == TRUE:
-        link_list = book_info.rescrape(link_list, save_to_local, save_to_rds)
+        link_list = book_info.rescrape(link_list, save_to_local, save_to_rds, engine)
     print("get data")
     price_list, name_list, isbn_list, id_list, img_list = book_info.get_data(link_list)
     print("save data")
-    book_info.save_data_files(link_list, price_list, name_list, isbn_list, id_list, img_list, save_to_rds, save_to_s3_from_file, save_to_local, save_to_s3)
+    book_info.save_data_files(link_list, price_list, name_list, isbn_list, id_list, img_list, save_to_rds, save_to_s3_from_file, save_to_local, save_to_s3, engine)
 
 
 
