@@ -22,7 +22,16 @@ MILESTONE 4
 Generate a unit test file in order to check the datatypes of the outputs of each method in the Scraper class. 
 Generate a integration test file in order to check the file integrety of the saved data
 
-MILESTONE 5
+MILESTONE 6
 Uploaded raw data into s3 bucket using boto3
 Uploaded tabular data to RDS using psycopg2 and sqlalchemy
 Option to upload image data directly to s3
+
+MILESTONE 7
+prevent rescraping
+
+MILESTONE 8 
+Run scraper in headless mode. 
+Create dockerhub image
+Push the container to the dockerhub
+Pull the image and run the scraper in the EC2 instance. 

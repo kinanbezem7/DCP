@@ -24,7 +24,7 @@ s3_client = boto3.client('s3')
 
 
 try:
-    os.mkdir('raw_data ')
+    os.mkdir('raw_data')
 except FileExistsError:
     print("Directory already exists")
 
@@ -292,8 +292,8 @@ class Scraper:
 if __name__ == "__main__":
     save_to_rds = FALSE
     save_to_s3_from_file = FALSE 
-    save_to_local = FALSE
-    save_to_s3 = TRUE # Upload images to s3 Bucket
+    save_to_local = TRUE
+    save_to_s3 = FALSE # Upload images to s3 Bucket
 
     #book_info = Scraper(URL = "https://www.waterstones.com/campaign/special-editions")
     book_info = Scraper(URL = "https://www.waterstones.com/campaign/summer")
@@ -314,6 +314,8 @@ if __name__ == "__main__":
     book_info.save_data_files(link_list, price_list, name_list, isbn_list, id_list, img_list, save_to_rds, save_to_s3_from_file, save_to_local, engine)
     if save_to_s3 == TRUE:
         book_info.save_to_s3(link_list, price_list, name_list, isbn_list, id_list, img_list)
+
+    book_info.driver.close()
 
 
 
