@@ -39,3 +39,9 @@ Pull the image and run the scraper in the EC2 instance.
 MILESTONE 9
 Set-up Prometheus to monitor the scraper and ec2 instance. 
 set-up Gradana to monitor the metrics 
+
+MILESTONE 10 
+
+Setup GitHub secrets to connect the repo to the dockerhub image
+Created GitHub action to create and push the new image everytime there is a push to the main branch 
+Created cron jobs on the ec2 instance to kill the container, download the new image and run it everyday
