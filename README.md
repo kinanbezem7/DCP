@@ -35,3 +35,7 @@ Run scraper in headless mode.
 Create dockerhub image
 Push the container to the dockerhub
 Pull the image and run the scraper in the EC2 instance. 
+
+MILESTONE 9
+Set-up Prometheus to monitor the scraper and ec2 instance. 
+set-up Gradana to monitor the metrics 
