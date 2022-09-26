@@ -92,7 +92,7 @@ class Scraper:
             DBAPI = 'psycopg2'
             HOST = 'dcp.c1vhfqtykqij.us-east-1.rds.amazonaws.com'
             USER = 'postgres'
-            PASSWORD = 'Nazim79737?'
+            PASSWORD = #'password'
             DATABASE = 'postgres'
             PORT = 5432
             engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}")
